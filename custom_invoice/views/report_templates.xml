@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <function model="res.company" name="write">
+            <value model="res.company" search="[('external_report_layout_id.key', '=', 'custom_invoice.external_layout_custom')]"/>
+            <value eval="{'external_report_layout_id': ref('web.external_layout_bubble')}"/>
+        </function>
+
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('name', '=', 'paperformat_euro'), ('module', '=', 'base')]"/>
+            </function>
+            <value eval="{'noupdate': False}"/>
+        </function>
+        <record id="base.paperformat_euro" model="report.paperformat">
+            <field name="margin_top">45</field>
+            <field name="header_spacing">45</field>
+            <field name="margin_bottom">25</field>
+        </record>
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('name', '=', 'paperformat_euro'), ('module', '=', 'base')]"/>
+            </function>
+            <value eval="{'noupdate': True}"/>
+        </function>
+
+        <template id="layout_custom_header">
+            <t t-if="not o" t-set="o" t-value="doc"/>
+            <t t-if="not company">
+                <t t-if="company_id">
+                    <t t-set="company" t-value="company_id"/>
+                </t>
+                <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                    <t t-set="company" t-value="o.company_id.sudo()"/>
+                </t>
+                <t t-else="">
+                    <t t-set="company" t-value="res_company"/>
+                </t>
+            </t>
+
+            <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+
+            <t t-set="bg_image" t-value="report_company.layout_background_image if report_company.layout_background == 'Custom' else False"/>
+            <t t-set="custom_layout_background_url"
+               t-value="image_data_uri(bg_image) if bg_image else
+                    '/base/static/img/demo_logo_report.png' if report_company.layout_background == 'Demo logo' else ''"/>
+
+            <div t-attf-class="header o_company_#{report_company.id}_layout" style="margin: 20px 0 0 0 !important; padding: 0 !important; width: 100% !important; background: #fff !important;">
+                <div class="o_inv_header_white_sheet">
+                    <img class="o_inv_report_header"
+                         t-att-src="'/custom_invoice/static/report_header.png'"
+                         alt="Report Header"
+                         style="width: 100%; height: auto; display: block;"/>
+                </div>
+
+                <div t-if="bg_image"
+                     style="position: fixed;
+                            top: 150px;
+                            left: 0;
+                            width: 100%;
+                            z-index: -1;
+                            opacity: 0.07;
+                            text-align: center;
+                            pointer-events: none;">
+                    <img t-att-src="custom_layout_background_url"
+                         style="width: 99.9%;
+                                height: auto;
+                                display: inline-block;"/>
+                </div>
+            </div>
+        </template>
+
+        <template id="layout_custom_footer">
+            <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+            <div t-attf-class="footer o_company_#{report_company.id}_layout" style="margin: 0 -45px -30px -45px !important; padding: 0 !important; width: calc(100% + 90px) !important;">
+                <div t-if="company.report_footer and not is_html_empty(company.report_footer)"
+                     class="o_inv_footer_content"
+                     t-field="company.report_footer"/>
+                <div t-elif="report_company.report_footer and not is_html_empty(report_company.report_footer)"
+                     class="o_inv_footer_content"
+                     t-field="report_company.report_footer"/>
+            </div>
+        </template>
+
+        <!-- Patch every standard layout so Bubble/Light/etc. keep working in Document Layout -->
+        <template id="external_layout_standard_inherit" inherit_id="web.external_layout_standard">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_striped_inherit" inherit_id="web.external_layout_striped">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_boxed_inherit" inherit_id="web.external_layout_boxed">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_bold_inherit" inherit_id="web.external_layout_bold">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_bubble_inherit" inherit_id="web.external_layout_bubble">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_wave_inherit" inherit_id="web.external_layout_wave">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+            <xpath expr="//t[@t-set='header_shape_height']" position="attributes">
+                <attribute name="t-value"/>
+            </xpath>
+        </template>
+
+        <template id="external_layout_folder_inherit" inherit_id="web.external_layout_folder">
+            <xpath expr="//t[@t-set='layout_background_url']" position="replace">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled">
+                    <t t-set="layout_background_url" t-value="''"/>
+                </t>
+                <t t-else="">
+                    <t t-set="layout_background_url"
+                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
+                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+                </t>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'header')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_header"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="attributes">
+                <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="before">
+                <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+                <t t-if="report_company.is_invoice_customization_enabled" t-call="custom_invoice.layout_custom_footer"/>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

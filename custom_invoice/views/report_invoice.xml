@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   <template id="report_invoice_document"
+      inherit_id="account.report_invoice_document"
+      primary="True">
+
+      <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+         <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=lang)"/>
+
+            <div class="o_inv_body_content o_althuraya_invoice">
+
+               <div class="o_inv_title">
+                  <t t-if="proforma">Pro-forma Invoice</t>
+                  <t t-else="">Tax Invoice</t>
+               </div>
+
+               <div class="row o_to_from_box">
+                  <div class="col-6">
+                     <strong class="o_to_from_label">To:</strong>
+                     <div class="o_to_from_address"
+                          t-field="o.partner_id"
+                          t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                  </div>
+                  <div class="col-6">
+                     <strong class="o_to_from_label">From:</strong>
+                     <div class="o_to_from_address"
+                          t-field="o.company_id.partner_id"
+                          t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                     <div t-if="o.company_id.vat" class="o_to_from_address o_from_trn">
+                        <strong>TRN: </strong><span t-field="o.company_id.vat"/>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="o_inv_number" t-if="o.name and o.name != '/'">
+                  <t t-if="proforma">Pro-forma </t><span t-field="o.name"/>
+               </div>
+
+               <div class="o_inv_number_meta_block mb-3">
+                  <div class="o_inv_meta_box">
+                     <table class="o_inv_meta_table o_ignore_layout_styling table table-borderless mb-0">
+                        <tr>
+                           <td class="o_meta_cell o_meta_cell_invoice_date">
+                              <div class="o_meta_label">Invoice Date</div>
+                              <div class="o_meta_value" t-out="o.invoice_date and o.invoice_date.strftime('%d-%m-%Y') or ''"/>
+                           </td>
+                           <td class="o_meta_cell o_meta_cell_due_date">
+                              <div class="o_meta_label">Due Date</div>
+                              <div class="o_meta_value" t-out="o.invoice_date_due and o.invoice_date_due.strftime('%d-%m-%Y') or ''"/>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+
+               <div class="o_inv_lines_wrapper">
+               <table class="table table-sm o_inv_lines o_ignore_layout_styling table-borderless mb-0">
+                  <thead>
+                     <tr>
+                        <th class="text-center" style="width:4%;">SR.</th>
+                        <th class="text-center" style="width:8%;">PLATE #</th>
+                        <th class="text-start" style="width:28%;">DESCRIPTION</th>
+                        <th class="text-start" style="width:14%;">PRODUCT / SERVICE</th>
+                        <th class="text-center" style="width:10%;">START DATE</th>
+                        <th class="text-center" style="width:10%;">END DATE</th>
+                        <th class="text-end" style="width:10%;">UNIT PRICE</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <t t-set="lines_to_report" t-value="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product').sorted(key=lambda l: l.sequence)"/>
+                     <tr t-foreach="lines_to_report" t-as="line">
+                        <td class="text-center"><span t-out="line.sr_no"/></td>
+                        <td class="text-center"><span t-field="line.plate_no"/></td>
+                        <td>
+                           <t t-if="line.chassis_no"><span t-field="line.chassis_no"/><br/></t>
+                           <t t-if="line.car_model"><span t-field="line.car_model"/><br/></t>
+                           <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}"/>
+                        </td>
+                        <td><span t-field="line.product_id"/></td>
+                        <td class="text-center"><span t-field="line.service_start_date"/></td>
+                        <td class="text-center"><span t-field="line.service_end_date"/></td>
+                        <td class="text-end">
+                           <span t-field="line.price_unit"
+                                 t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+               </div>
+
+               <t t-set="inv_taxes" t-value="o.invoice_line_ids.mapped('tax_ids').filtered(lambda t: t.amount_type == 'percent')"/>
+               <t t-set="invoice_bank" t-value="o.partner_bank_id or o.company_id.partner_id.bank_ids[:1]"/>
+               <div class="row o_bottom_section">
+                  <div class="col-7">
+                     <div t-if="o.payment_reference or o.name" class="o_payment_communication">
+                        <strong>Payment Communication:</strong>
+                        <span class="fw-bold" t-out="o.payment_reference or o.name"/>
+                     </div>
+                     <div class="o_payment_account" t-if="invoice_bank">
+                        <strong>on this account:</strong>
+                        <span class="o_bank_account_number fw-bold">
+                           <span t-out="invoice_bank.acc_number"/>
+                           <t t-if="invoice_bank.bank_id"> - <span t-field="invoice_bank.bank_id.name"/></t>
+                        </span>
+                     </div>
+                  </div>
+                  <div class="col-5">
+                     <div class="o_totals_table_wrapper">
+                     <table class="table table-sm o_totals_table o_ignore_layout_styling table-borderless w-100 mb-0">
+                        <tr>
+                           <td>Untaxed Amount</td>
+                           <td class="text-end">
+                              <span t-field="o.amount_untaxed"
+                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>
+                              VAT
+                              <t t-if="inv_taxes" t-out="' ' + str(int(inv_taxes[0].amount)) + '%'"/>
+                              <t t-else=""> 0%</t>
+                           </td>
+                           <td class="text-end">
+                              <span t-field="o.amount_tax"
+                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                           </td>
+                        </tr>
+                        <tr class="o_total_row">
+                           <td>Total</td>
+                           <td class="text-end">
+                              <span t-field="o.amount_total"
+                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                           </td>
+                        </tr>
+                        <t t-if="print_with_payments">
+                           <t t-if="o.payment_state != 'invoicing_legacy'">
+                              <t t-set="payments_vals" t-value="o.sudo().invoice_payments_widget and o.sudo().invoice_payments_widget['content'] or []"/>
+                              <t t-foreach="payments_vals" t-as="payment_vals">
+                                 <tr t-if="payment_vals['is_exchange'] == 0">
+                                    <td>
+                                       <t t-if="payment_vals['is_refund']">Reversed on </t>
+                                       <t t-else="">Paid on </t>
+                                       <span t-out="payment_vals['date'] and payment_vals['date'].strftime('%d-%m-%Y') or ''"/>
+                                    </td>
+                                    <td class="text-end">
+                                       <span t-out="payment_vals['amount']"
+                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                 </tr>
+                              </t>
+                              <tr t-if="len(payments_vals) > 0" class="o_amount_due_row">
+                                 <td>Amount Due</td>
+                                 <td class="text-end">
+                                    <span t-field="o.amount_residual"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                 </td>
+                              </tr>
+                           </t>
+                        </t>
+                     </table>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </t>
+      </xpath>
+
+   </template>
+
+   <template id="report_invoice" inherit_id="account.report_invoice">
+      <xpath expr='//t[@t-call="account.report_invoice_document"]' position="after">
+         <t t-elif="o._get_name_invoice_report() == 'custom_invoice.report_invoice_document'"
+            t-call="custom_invoice.report_invoice_document"
+            t-lang="lang"/>
+      </xpath>
+   </template>
+
+   <template id="report_invoice_pro_forma">
+      <t t-call="web.html_container">
+         <t t-foreach="docs" t-as="o">
+            <t t-set="lang" t-value="o.partner_id.lang"/>
+            <t t-set="proforma" t-value="True"/>
+            <t t-call="custom_invoice.report_invoice_document" t-lang="lang"/>
+         </t>
+      </t>
+   </template>
+
+   <record id="action_report_pro_forma_invoice" model="ir.actions.report">
+      <field name="name">PRO-FORMA Invoice</field>
+      <field name="model">account.move</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">custom_invoice.report_invoice_pro_forma</field>
+      <field name="report_file">custom_invoice.report_invoice_pro_forma</field>
+      <field name="print_report_name">'PRO-FORMA - %s' % (object.name)</field>
+      <field name="binding_model_id" ref="account.model_account_move"/>
+      <field name="binding_type">report</field>
+      <field name="is_invoice_report">True</field>
+   </record>
+
+</odoo>

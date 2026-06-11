@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   <!-- Employee ID comes from the work contact — field is employee_code, not employee_id -->
+
+   <!-- Form — separate row under the name (can't use placeholder in xpath) -->
+   <record id="view_employee_form_inherit_employee_id" model="ir.ui.view">
+      <field name="name">hr.employee.form.inherit.employee.id</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr.view_employee_form" />
+      <field name="arch" type="xml">
+         <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+            <h5 class="d-flex align-items-baseline mb-0">
+               <i class="fa fa-id-card fa-fw me-1 text-primary" title="Employee ID" />
+               <field name="employee_code" readonly="1" string="Employee ID"
+                  placeholder="Auto-generated on save" class="w-100 w-sm-75" />
+            </h5>
+         </xpath>
+      </field>
+   </record>
+
+   <!-- List -->
+   <record id="view_employee_list_inherit_employee_code" model="ir.ui.view">
+      <field name="name">hr.employee.list.inherit.employee.code</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr.view_employee_tree" />
+      <field name="arch" type="xml">
+         <xpath expr="//field[@name='name']" position="after">
+            <field name="employee_code" string="Employee ID" readonly="1" optional="show" />
+         </xpath>
+      </field>
+   </record>
+
+   <!-- Kanban -->
+   <record id="view_employee_kanban_inherit_employee_code" model="ir.ui.view">
+      <field name="name">hr.employee.kanban.inherit.employee.code</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr.hr_kanban_view_employees" />
+      <field name="arch" type="xml">
+         <xpath expr="//kanban/field[@name='company_id']" position="after">
+            <field name="employee_code" />
+         </xpath>
+         <xpath expr="//field[@name='job_title']/parent::div" position="before">
+            <div t-if="record.employee_code.raw_value" class="text-truncate">
+               <i class="fa fa-fw me-2 fa-id-card text-primary" title="Employee ID" />
+               <field name="employee_code" />
+            </div>
+         </xpath>
+      </field>
+   </record>
+
+</odoo>

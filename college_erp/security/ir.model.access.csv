@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_college_students_user,college.students.user,model_college_students,college_erp.group_college_erp_user,1,1,1,0
+access_college_students_manager,college.students.manager,model_college_students,college_erp.group_college_erp_manager,1,1,1,1

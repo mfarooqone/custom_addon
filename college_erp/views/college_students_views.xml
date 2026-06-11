@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <!-- Search -->
+   <record id="view_college_students_search" model="ir.ui.view">
+      <field name="name">college.students.search</field>
+      <field name="model">college.students</field>
+      <field name="arch" type="xml">
+         <search string="Students">
+            <field name="name" />
+            <field name="admission_number" />
+            <field name="program" />
+            <field name="batch" />
+            <field name="email" />
+            <field name="phone" />
+            <separator />
+            <filter name="male" string="Male" domain="[('gender', '=', 'male')]" />
+            <filter name="female" string="Female" domain="[('gender', '=', 'female')]" />
+            <separator />
+            <group>
+               <filter name="group_gender" string="Gender" context="{'group_by': 'gender'}" />
+               <filter name="group_program" string="Program" context="{'group_by': 'program'}" />
+               <filter name="group_batch" string="Batch" context="{'group_by': 'batch'}" />
+               <filter name="group_semester" string="Semester" context="{'group_by': 'semester'}" />
+            </group>
+         </search>
+      </field>
+   </record>
+
+   <!-- Kanban -->
+
+   <record id="view_college_students_kanban" model="ir.ui.view">
+      <field name="name">college.students.kanban</field>
+      <field name="model">college.students</field>
+      <field name="arch" type="xml">
+         <kanban sample="1">
+            <field name="image_128" />
+            <field name="name" />
+            <field name="admission_number" />
+            <field name="program" />
+            <field name="batch" />
+            <field name="semester" />
+            <field name="gender" />
+            <field name="email" />
+            <field name="phone" />
+            <templates>
+               <t t-name="card" class="flex-row">
+                  <aside class="o_kanban_aside_full">
+                     <field name="image_128" widget="image" class="w-100"
+                        options="{'img_class': 'object-fit-cover'}" />
+                  </aside>
+                  <main class="ps-2">
+                     <field name="name" class="fw-bold fs-5" />
+                     <div t-if="record.admission_number.raw_value" class="text-muted">
+                        <i class="fa fa-fw me-1 fa-id-card text-primary" title="Admission Number" />
+                        <field name="admission_number" />
+                     </div>
+                     <div t-if="record.program.raw_value" class="text-truncate">
+                        <i class="fa fa-fw me-1 fa-graduation-cap text-primary" title="Program" />
+                        <field name="program" />
+                     </div>
+                     <div t-if="record.batch.raw_value or record.semester.raw_value">
+                        <i class="fa fa-fw me-1 fa-users text-primary" title="Batch" />
+                        <field name="batch" />
+                        <span t-if="record.batch.raw_value and record.semester.raw_value"> · </span>
+                        <span t-if="record.semester.raw_value">Sem </span>
+                        <field name="semester" />
+                     </div>
+                     <div t-if="record.email.raw_value" class="text-truncate">
+                        <i class="fa fa-fw me-1 fa-envelope text-primary" title="Email" />
+                        <field name="email" />
+                     </div>
+                     <div t-if="record.phone.raw_value">
+                        <i class="fa fa-fw me-1 fa-phone text-primary" title="Phone" />
+                        <field name="phone" />
+                     </div>
+                  </main>
+               </t>
+            </templates>
+         </kanban>
+      </field>
+   </record>
+
+   <!-- List -->
+
+   <record id="view_college_students_list" model="ir.ui.view">
+      <field name="name">college.students.list</field>
+      <field name="model">college.students</field>
+      <field name="arch" type="xml">
+         <list string="Students" sample="1" class="o_college_student_list">
+            <field name="image_128" widget="image" optional="show" nolabel="1" width="50"
+               options="{'size': [32, 32], 'img_class': 'o_avatar rounded-circle'}" />
+            <field name="admission_number" />
+            <field name="name" />
+            <field name="program" optional="show" />
+            <field name="batch" optional="hide" />
+            <field name="semester" optional="hide" />
+            <field name="gender" optional="show" />
+            <field name="email" optional="show" />
+            <field name="phone" optional="show" />
+            <field name="admission_date" />
+         </list>
+      </field>
+   </record>
+
+   <!-- Form -->
+
+   <record id="view_college_students_form" model="ir.ui.view">
+      <field name="name">college.students.form</field>
+      <field name="model">college.students</field>
+      <field name="arch" type="xml">
+         <form>
+            <sheet>
+               <field name="image_1920" widget="image" class="oe_avatar"
+                  options="{'preview_image': 'image_128'}" />
+               <div class="oe_title">
+                  <label for="name" />
+                  <h1>
+                     <field name="name" placeholder="Student name" />
+                  </h1>
+                  <h3>
+                     <field name="admission_number" placeholder="Admission number" />
+                  </h3>
+               </div>
+               <group>
+                  <group>
+                     <field name="admission_date" />
+                     <field name="gender" />
+                     <field name="age" />
+                  </group>
+               </group>
+               <notebook>
+                  <page string="Personal Information" name="personal">
+                     <group>
+                        <group string="Contact Details">
+                           <field name="email" widget="email" />
+                           <field name="phone" widget="phone" />
+                        </group>
+                     </group>
+                  </page>
+                  <page string="Admission" name="admission">
+                     <group string="Admission Details">
+                        <field name="admission_number" />
+                        <field name="admission_date" />
+                     </group>
+                  </page>
+                  <page string="Address" name="address">
+                     <group>
+                        <label for="comm_street" string="Communication Address" />
+                        <div class="o_address_format">
+                           <field name="comm_street" placeholder="Street..." class="o_address_street" />
+                           <field name="comm_street2" placeholder="Street 2..." class="o_address_street" />
+                           <field name="comm_city" placeholder="City" class="o_address_city" />
+                           <field name="comm_country_id" placeholder="Country" class="o_address_country"
+                              options="{'no_open': True, 'no_create': True}" />
+                           <field name="comm_state_id" class="o_address_state" placeholder="State / Province"
+                              domain="[('country_id', '=?', comm_country_id)]"
+                              options="{'no_open': True, 'no_quick_create': True}"
+                              context="{'country_id': comm_country_id, 'default_country_id': comm_country_id, 'zip': comm_zip}" />
+                           <field name="comm_zip" placeholder="ZIP" class="o_address_zip" />
+                        </div>
+                        <field name="same_as_communication" widget="boolean_toggle" />
+                     </group>
+                     <group invisible="same_as_communication">
+                        <label for="perm_street" string="Permanent Address" />
+                        <div class="o_address_format">
+                           <field name="perm_street" placeholder="Street..." class="o_address_street" />
+                           <field name="perm_street2" placeholder="Street 2..." class="o_address_street" />
+                           <field name="perm_city" placeholder="City" class="o_address_city" />
+                           <field name="perm_country_id" placeholder="Country" class="o_address_country"
+                              options="{'no_open': True, 'no_create': True}" />
+                           <field name="perm_state_id" class="o_address_state" placeholder="State / Province"
+                              domain="[('country_id', '=?', perm_country_id)]"
+                              options="{'no_open': True, 'no_quick_create': True}"
+                              context="{'country_id': perm_country_id, 'default_country_id': perm_country_id, 'zip': perm_zip}" />
+                           <field name="perm_zip" placeholder="ZIP" class="o_address_zip" />
+                        </div>
+                     </group>
+                  </page>
+                  <page string="Academic" name="academic">
+                     <group>
+                        <group string="Program Details">
+                           <field name="program" />
+                           <field name="batch" />
+                           <field name="semester" />
+                        </group>
+                     </group>
+                  </page>
+                  <page string="Guardian" name="guardian">
+                     <group>
+                        <group string="Guardian / Parent">
+                           <field name="guardian_name" />
+                           <field name="guardian_relation" />
+                           <field name="guardian_phone" widget="phone" />
+                           <field name="guardian_email" widget="email" />
+                        </group>
+                     </group>
+                  </page>
+                  <page string="Notes" name="notes">
+                     <field name="notes" placeholder="Internal remarks, documents pending, etc." />
+                  </page>
+               </notebook>
+            </sheet>
+         </form>
+      </field>
+   </record>
+
+   <!-- Actions -->
+
+   <record id="action_college_students" model="ir.actions.act_window">
+      <field name="name">Students</field>
+      <field name="res_model">college.students</field>
+      <field name="view_mode">kanban,list,form</field>
+      <field name="help" type="html">
+         <p class="o_view_nocontent_smiling_face">
+            Create a new student
+         </p>
+      </field>
+   </record>
+
+
+   <record id="action_college_admission" model="ir.actions.act_window">
+      <field name="name">Admission</field>
+      <field name="res_model">college.students</field>
+      <field name="view_mode">kanban,list,form</field>
+      <field name="help" type="html">
+         <p class="o_view_nocontent_smiling_face">
+            Register a new admission
+         </p>
+      </field>
+   </record>
+</odoo>

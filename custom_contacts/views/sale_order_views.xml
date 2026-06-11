@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   <!-- Customer ID on quotations and sales orders -->
+
+   <record id="view_sale_order_tree_inherit_customer_id" model="ir.ui.view">
+      <field name="name">sale.order.list.inherit.customer.id</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.sale_order_tree"/>
+      <field name="arch" type="xml">
+         <xpath expr="//field[@name='partner_id']" position="after">
+            <field name="customer_id" string="Customer ID" optional="show"/>
+         </xpath>
+      </field>
+   </record>
+
+   <record id="view_sale_order_kanban_inherit_customer_id" model="ir.ui.view">
+      <field name="name">sale.order.kanban.inherit.customer.id</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_sale_order_kanban"/>
+      <field name="arch" type="xml">
+         <xpath expr="//kanban/field[@name='currency_id']" position="after">
+            <field name="customer_id"/>
+         </xpath>
+         <xpath expr="//templates/t[@t-name='card']/div[field[@name='partner_id']]" position="after">
+            <div t-if="record.customer_id.raw_value" class="text-muted text-truncate mb-1">
+               <i class="fa fa-fw me-1 fa-id-card text-primary" title="Customer ID"/>
+               <field name="customer_id"/>
+            </div>
+         </xpath>
+      </field>
+   </record>
+
+</odoo>

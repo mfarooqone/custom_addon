@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <record id="view_move_form_inherit_custom_invoice" model="ir.ui.view">
+      <field name="name">account.move.form.inherit.custom.invoice</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_move_form" />
+      <field name="arch" type="xml">
+
+         <field name="invoice_date" position="after">
+            <field name="use_custom_invoice_layout" invisible="1" />
+         </field>
+
+         <!-- Sr. column - first custom column -->
+         <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='sequence']"
+            position="after">
+            <field name="sr_no"
+               string="Sr."
+               optional="show"
+               readonly="1"
+               column_invisible="not parent.use_custom_invoice_layout" />
+            <field name="plate_no"
+               optional="show"
+               column_invisible="not parent.use_custom_invoice_layout" />
+            <field name="chassis_no"
+               optional="show"
+               column_invisible="not parent.use_custom_invoice_layout" />
+            <field name="car_model"
+               optional="show"
+               column_invisible="not parent.use_custom_invoice_layout" />
+            <field name="service_start_date"
+               optional="show"
+               column_invisible="not parent.use_custom_invoice_layout" />
+            <field name="service_end_date"
+               optional="show"
+               column_invisible="not parent.use_custom_invoice_layout" />
+         </xpath>
+
+         <!-- Show Account column when custom invoice is ON -->
+         <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='account_id']"
+            position="attributes">
+            <attribute name="groups" />
+            <attribute name="optional">show</attribute>
+            <attribute name="column_invisible">not parent.use_custom_invoice_layout</attribute>
+         </xpath>
+
+      </field>
+   </record>
+</odoo>

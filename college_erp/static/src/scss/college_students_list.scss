@@ -1,0 +1,18 @@
+.o_college_student_list {
+    .o_data_cell[name="image_128"] .o_field_image {
+        --Avatar-size: 32px;
+
+        > div {
+            width: 32px;
+            height: 32px;
+        }
+
+        img {
+            width: 32px !important;
+            height: 32px !important;
+            max-width: 32px !important;
+            max-height: 32px !important;
+            object-fit: cover;
+        }
+    }
+}

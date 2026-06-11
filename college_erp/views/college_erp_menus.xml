@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root menu -->
+    <menuitem
+        id="menu_college_erp_root"
+        name="College ERP"
+        sequence="10"
+        groups="college_erp.group_college_erp_user"
+        web_icon="college_erp,static/description/icon.png" />
+    <!-- Students section -->
+    <menuitem
+        id="menu_college_erp_students_management"
+        name="Students"
+        parent="menu_college_erp_root" />
+
+    <menuitem
+        id="menu_college_erp_students"
+        name="Students"
+        parent="menu_college_erp_students_management"
+        action="action_college_students" />
+    <menuitem
+        id="menu_college_erp_admission"
+        name="Admission"
+        parent="menu_college_erp_students_management"
+        action="action_college_admission" />
+</odoo>
