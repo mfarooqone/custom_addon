@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_crm_integration" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.crm.integration</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="CRM Integration"
+                     string="CRM Integration"
+                     name="crm_integration"
+                     logo="/crm_integration/static/description/icon.png"
+                     groups="sales_team.group_sale_salesman">
+                    <block title="CRM Integration" name="crm_integration_setting">
+                        <setting id="crm_enable_integration"
+                                 string="Enable CRM Integration"
+                                 help="Toggle CRM integration for this company.">
+                            <field name="enable_crm_integration"/>
+                        </setting>
+                        <setting id="crm_api_key_setting"
+                                 string="CRM API Key"
+                                 help="API key used to authenticate CRM requests.">
+                            <field name="crm_api_key" password="True"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
