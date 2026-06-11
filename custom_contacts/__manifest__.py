@@ -10,7 +10,7 @@
         Contact type enforcement (customer / vendor / employee) with sequential IDs,
         partner views, and domain filters on sales, purchase, and HR.
     """,
-    'depends': ['base', 'contacts', 'sale', 'purchase', 'hr', 'account'],
+    'depends': ['base', 'contacts'],
     'auto_install': True,
     'installable': True,
     'application': False,
