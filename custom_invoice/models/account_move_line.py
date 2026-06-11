@@ -11,6 +11,36 @@ class AccountMoveLine(models.Model):
     car_model = fields.Char(string='Car Model')
     service_start_date = fields.Date(string='Service Start Date')
     service_end_date = fields.Date(string='Service End Date')
+    invoice_line_description = fields.Char(
+        string='Invoice Line Description',
+        compute='_compute_invoice_line_description',
+    )
+
+    @api.depends('name', 'product_id', 'move_id.partner_id.lang')
+    def _compute_invoice_line_description(self):
+        for line in self:
+            line.invoice_line_description = line._get_invoice_line_description()
+
+    def _get_invoice_line_description(self):
+        """Return line text without the product name (shown in its own column)."""
+        self.ensure_one()
+        if not self.name:
+            return False
+        if not self.product_id:
+            return self.name
+        product = self.product_id.with_context(
+            lang=self.move_id.partner_id.lang or self.env.lang,
+        )
+        product_name = product.display_name
+        name = self.name.strip()
+        if name == product_name:
+            return False
+        if name.startswith(product_name + '\n'):
+            return name[len(product_name) + 1:].strip() or False
+        lines = name.split('\n', 1)
+        if len(lines) > 1 and lines[0].strip() == product_name:
+            return lines[1].strip() or False
+        return self.name
 
     @api.model
     def _is_invoice_product_line(self, line):

@@ -1,6 +1,6 @@
 {
     'name': 'Custom Invoice',
-    'version': '19.0.1.1.1',
+    'version': '19.0.1.1.2',
     'license': 'LGPL-3',
     'author': 'Najoom Al Thuraya',
     'website': 'https://althurayauae.com/',

@@ -76,7 +76,7 @@
                         <td>
                            <t t-if="line.chassis_no"><span t-field="line.chassis_no"/><br/></t>
                            <t t-if="line.car_model"><span t-field="line.car_model"/><br/></t>
-                           <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}"/>
+                           <span t-if="line.invoice_line_description" t-field="line.invoice_line_description" t-options="{'widget': 'text'}"/>
                         </td>
                         <td><span t-field="line.product_id"/></td>
                         <td class="text-center"><span t-field="line.service_start_date"/></td>
