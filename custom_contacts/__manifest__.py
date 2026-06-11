@@ -1,6 +1,6 @@
 {
     'name': 'Custom Contacts',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'license': 'LGPL-3',
     'author': 'Najoom Al Thuraya',
     'website': 'https://althurayauae.com/',
@@ -10,10 +10,12 @@
         Contact type enforcement (customer / vendor / employee) with sequential IDs,
         partner views, and domain filters on sales, purchase, and HR.
     """,
-    'depends': ['base', 'contacts'],
+    'depends': ['base', 'contacts', 'sale', 'purchase', 'hr', 'account'],
     'auto_install': True,
     'installable': True,
     'application': False,
+    'sequence': -100,
+    'icon': '/custom_contacts/static/description/icon.png',
     'pre_init_hook': 'pre_init_hook',
     'data': [
         'views/res_partner_views.xml',

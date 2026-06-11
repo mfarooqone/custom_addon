@@ -1,6 +1,6 @@
 {
     'name': 'Custom Invoice',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.1',
     'license': 'LGPL-3',
     'author': 'Najoom Al Thuraya',
     'website': 'https://althurayauae.com/',
@@ -14,6 +14,8 @@
     'auto_install': True,
     'installable': True,
     'application': False,
+    'sequence': -90,
+    'icon': '/custom_invoice/static/description/icon.png',
     'data': [
         'views/res_company_views.xml',
         'views/res_config_settings_views.xml',

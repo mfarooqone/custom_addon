@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Runs after each upgrade to fix duplicate IDs and sync counters -->
     <function model="res.partner" name="_sync_all_contact_sequences"/>
+    <function model="ir.module.module" name="_refresh_all_addon_icons"/>
 </odoo>

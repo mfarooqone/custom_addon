@@ -6,7 +6,7 @@
    <record id="seq_customer" model="ir.sequence">
       <field name="name">Customer ID</field>
       <field name="code">customer.id</field>
-      <field name="prefix">CUST/</field>
+      <field name="prefix">CUST</field>
       <field name="padding">5</field>
       <field name="number_next">1</field>
       <field name="number_increment">1</field>
@@ -15,7 +15,7 @@
    <record id="seq_vendor" model="ir.sequence">
       <field name="name">Vendor ID</field>
       <field name="code">vendor.id</field>
-      <field name="prefix">VEND/</field>
+      <field name="prefix">VEND</field>
       <field name="padding">5</field>
       <field name="number_next">1</field>
       <field name="number_increment">1</field>
@@ -24,7 +24,7 @@
    <record id="seq_employee" model="ir.sequence">
       <field name="name">Employee ID</field>
       <field name="code">employee.id</field>
-      <field name="prefix">EMP/</field>
+      <field name="prefix">EMP</field>
       <field name="padding">5</field>
       <field name="number_increment">1</field>
       <field name="number_next">1</field>

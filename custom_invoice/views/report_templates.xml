@@ -82,18 +82,38 @@
             </div>
         </template>
 
+        <template id="layout_faded_background">
+            <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
+            <t t-if="not report_company.is_invoice_customization_enabled and report_company.layout_background in ('Custom', 'Demo logo')">
+                <t t-set="bg_image" t-value="report_company.layout_background_image if report_company.layout_background == 'Custom' else False"/>
+                <t t-set="faded_bg_url"
+                   t-value="image_data_uri(bg_image) if bg_image else
+                        '/base/static/img/demo_logo_report.png' if report_company.layout_background == 'Demo logo' else ''"/>
+                <div t-if="faded_bg_url"
+                     style="position: fixed;
+                            top: 150px;
+                            left: 0;
+                            width: 100%;
+                            z-index: -1;
+                            opacity: 0.07;
+                            text-align: center;
+                            pointer-events: none;">
+                    <img t-att-src="faded_bg_url"
+                         style="width: 99.9%;
+                                height: auto;
+                                display: inline-block;"/>
+                </div>
+            </t>
+        </template>
+
         <!-- Patch every standard layout so Bubble/Light/etc. keep working in Document Layout -->
         <template id="external_layout_standard_inherit" inherit_id="web.external_layout_standard">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -114,14 +134,10 @@
         <template id="external_layout_striped_inherit" inherit_id="web.external_layout_striped">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -142,14 +158,10 @@
         <template id="external_layout_boxed_inherit" inherit_id="web.external_layout_boxed">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -170,14 +182,10 @@
         <template id="external_layout_bold_inherit" inherit_id="web.external_layout_bold">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -198,14 +206,10 @@
         <template id="external_layout_bubble_inherit" inherit_id="web.external_layout_bubble">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -226,14 +230,10 @@
         <template id="external_layout_wave_inherit" inherit_id="web.external_layout_wave">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>
@@ -257,14 +257,10 @@
         <template id="external_layout_folder_inherit" inherit_id="web.external_layout_folder">
             <xpath expr="//t[@t-set='layout_background_url']" position="replace">
                 <t t-set="report_company" t-value="company.company_id.sudo() if company._name == 'base.document.layout' else company.sudo()"/>
-                <t t-if="report_company.is_invoice_customization_enabled">
-                    <t t-set="layout_background_url" t-value="''"/>
-                </t>
-                <t t-else="">
-                    <t t-set="layout_background_url"
-                       t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else
-                            '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
-                </t>
+                <t t-set="layout_background_url" t-value="''"/>
+            </xpath>
+            <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
+                <t t-call="custom_invoice.layout_faded_background"/>
             </xpath>
             <xpath expr="//div[contains(@t-attf-class, 'header')]" position="attributes">
                 <attribute name="t-if">not (company.company_id.is_invoice_customization_enabled if company._name == 'base.document.layout' else company.is_invoice_customization_enabled)</attribute>

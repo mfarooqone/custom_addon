@@ -72,4 +72,5 @@
     'installable': True,
     'application': False,
     'auto_install': False,
+    'sequence': -70,
 }

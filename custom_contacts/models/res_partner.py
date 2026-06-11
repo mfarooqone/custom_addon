@@ -25,6 +25,23 @@ class ResPartner(models.Model):
     def _company_partner_ids(self):
         return set(self.env['res.company'].sudo().search([]).mapped('partner_id').ids)
 
+    @api.model
+    def _user_partner_ids(self):
+        return set(self.env['res.users'].sudo().search([]).mapped('partner_id').ids)
+
+    @api.model
+    def _protected_partner_ids(self):
+        """Company and system user partners — never get contact type or sequential IDs."""
+        return self._company_partner_ids() | self._user_partner_ids()
+
+    def _clear_contact_id_fields(self):
+        super(ResPartner, self).write({
+            'contact_type': False,
+            'customer_id': False,
+            'vendor_id': False,
+            'employee_id': False,
+        })
+
     @api.depends('contact_type', 'customer_id', 'vendor_id', 'employee_id')
     def _compute_contact_code(self):
         for partner in self:
@@ -48,16 +65,13 @@ class ResPartner(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         partners = super().create(vals_list)
-        internal_ids = self._company_partner_ids()
+        protected_ids = self._protected_partner_ids()
+        company_ids = self._company_partner_ids()
         for partner in partners:
-            if partner.id in internal_ids:
-                partner.write({
-                    'is_internal_company': True,
-                    'contact_type': False,
-                    'customer_id': False,
-                    'vendor_id': False,
-                    'employee_id': False,
-                })
+            if partner.id in company_ids:
+                partner.write({'is_internal_company': True})
+            if partner.id in protected_ids:
+                partner._clear_contact_id_fields()
                 continue
             field = self._contact_id_field(partner.contact_type)
             if field and not partner[field]:
@@ -66,11 +80,13 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if 'contact_type' in vals:
-            internal_ids = self._company_partner_ids()
-            for partner in self:
-                if partner.id in internal_ids or partner.is_internal_company:
-                    continue
+        protected = self.filtered(lambda p: p.id in self._protected_partner_ids())
+        if protected:
+            protected._clear_contact_id_fields()
+        for partner in self - protected:
+            if partner.is_internal_company:
+                continue
+            if 'contact_type' in vals:
                 field = self._contact_id_field(partner.contact_type)
                 if field and not partner[field]:
                     partner[field] = self._next_contact_id(partner.contact_type)
@@ -160,23 +176,22 @@ class ResPartner(models.Model):
     @api.model
     def _sync_all_contact_sequences(self):
         """Called on module upgrade — fix internal company partner, backfill IDs, sync counters."""
-        internal_ids = self.env['res.company'].sudo().search([]).mapped('partner_id').ids
-        skip_ids = internal_ids or [0]
-        if internal_ids:
-            self.browse(internal_ids).write({
-                'is_internal_company': True,
-                'contact_type': False,
-                'customer_id': False,
-                'vendor_id': False,
-                'employee_id': False,
-            })
+        protected_ids = list(self._protected_partner_ids()) or [0]
+        company_ids = list(self._company_partner_ids())
+        skip_ids = protected_ids
+
+        if company_ids:
+            self.browse(company_ids).write({'is_internal_company': True})
+        if protected_ids:
+            self.browse(protected_ids)._clear_contact_id_fields()
+
         self.with_context(active_test=False).search([
             ('contact_type', '=', 'company'),
             ('id', 'not in', skip_ids),
         ]).write({'contact_type': 'customer'})
         self.search([
             ('is_internal_company', '=', True),
-            ('id', 'not in', skip_ids),
+            ('id', 'not in', company_ids or [0]),
         ]).write({'is_internal_company': False})
 
         self._restore_missing_contact_types(skip_ids)
