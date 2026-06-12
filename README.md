@@ -1,6 +1,6 @@
 # Odoo 19 Custom Addons
 
-Collection of custom Odoo 19 Community modules by **Najoom Al Thuraya**.
+Collection of custom Odoo 19 Enterprise modules by **Najoom Al Thuraya**.
 
 ## Modules
 
@@ -9,11 +9,11 @@ Collection of custom Odoo 19 Community modules by **Najoom Al Thuraya**.
 | `college_erp` | College student management (admissions, records) |
 | `custom_contacts` | Typed contacts with auto-generated customer, vendor, and employee IDs |
 | `custom_invoice` | Custom invoice PDF layout, fields, and company toggle |
-| `community_enterprise_theme_lite_pr` | Community enterprise-style theme |
+| `crm_integration` | Company-level CRM integration toggle and API key settings |
 
 ## Requirements
 
-- Odoo 19.0 (Community)
+- Odoo 19.0 (Enterprise)
 - Python 3.10 – 3.13
 - PostgreSQL 14+
 
@@ -28,7 +28,7 @@ git clone https://github.com/mfarooqone/custom_addon.git /path/to/odoo/custom_ad
 2. Add the path to `odoo.conf`:
 
 ```ini
-addons_path = /path/to/odoo/addons,/path/to/odoo/custom_addon
+addons_path = /path/to/odoo/addons,/path/to/odoo/enterprise,/path/to/odoo/custom_addon
 ```
 
 3. Restart Odoo, update the Apps list, and install the modules you need.

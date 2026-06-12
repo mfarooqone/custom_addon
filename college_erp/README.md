@@ -4,7 +4,7 @@
 [![Odoo](https://img.shields.io/badge/Odoo-19.0-875A7B.svg)](https://www.odoo.com)
 [![Version](https://img.shields.io/badge/version-19.0.1.0.2-green.svg)](https://github.com/mfarooqone/college_erp)
 
-**Odoo 19 Community addon** for college and institute management — student records, admissions, and education workflows.
+**Odoo 19 Enterprise addon** for college and institute management — student records, admissions, and education workflows.
 
 Repository: [github.com/mfarooqone/college_erp](https://github.com/mfarooqone/college_erp)
 
@@ -16,7 +16,7 @@ Repository: [github.com/mfarooqone/college_erp](https://github.com/mfarooqone/co
 - **Dedicated app** — *College ERP* on the Odoo home screen with app icon
 - **List & form views** — Browse and manage students from the backend
 - **Access rights** — Separate **User** and **Administrator** security groups
-- Built for **Odoo 19 Community Edition**
+- Built for **Odoo 19 Enterprise Edition**
 
 ## Screenshots
 
@@ -28,7 +28,7 @@ _Add screenshots of the Students list and form views here._
 
 | Component | Version |
 |-----------|---------|
-| Odoo | 19.0 (Community) |
+| Odoo | 19.0 (Enterprise) |
 | Python | 3.10 – 3.13 |
 | PostgreSQL | 14+ |
 
@@ -248,4 +248,4 @@ Maintainer: [@mfarooqone](https://github.com/mfarooqone)
 
 ## License
 
-This project is licensed under the [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.html) (LGPL-3), same as Odoo Community Edition.
+This project is licensed under the [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.html) (LGPL-3).
