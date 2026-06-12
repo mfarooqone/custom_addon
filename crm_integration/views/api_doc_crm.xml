@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the shared API documentation page with CRM Integration endpoints -->
+    <template id="api_doc_crm_integration" inherit_id="api_documentation.api_doc_page">
+        <xpath expr="//div[@id='api_doc_nav']" position="inside">
+            <a href="#crm-integration" class="o_api_doc_nav_item">CRM Integration</a>
+        </xpath>
+        <xpath expr="//div[@id='api_doc_content']" position="inside">
+            <section id="crm-integration" class="o_api_doc_module">
+                <h2>CRM Integration</h2>
+                <p class="o_api_doc_module_lead">
+                    REST endpoints to create and update contacts with contact type support.
+                </p>
+
+                <div class="o_api_doc_section">
+                    <h2>Authentication</h2>
+                    <p>Every request must include the company CRM API key from
+                        <strong>Settings → CRM Integration</strong>.
+                        CRM integration must be enabled for the company.</p>
+                    <div class="o_api_doc_cards">
+                        <div class="o_api_doc_card">
+                            <h3>Header (recommended)</h3>
+                            <pre>X-CRM-API-Key: &lt;your-api-key&gt;</pre>
+                        </div>
+                        <div class="o_api_doc_card">
+                            <h3>Bearer token</h3>
+                            <pre>Authorization: Bearer &lt;your-api-key&gt;</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_api_doc_section">
+                    <h2>Create Contact</h2>
+                    <div class="o_api_doc_endpoint">
+                        <span class="o_api_doc_method post">POST</span>
+                        <code>/api/crm/v1/contacts</code>
+                    </div>
+                    <p><strong>Required:</strong> <code>name</code>, <code>contact_type</code></p>
+                    <p><code>contact_type</code> values: <code>customer</code>, <code>vendor</code>, <code>employee</code></p>
+                    <h3>Request body</h3>
+                    <pre>{
+  "name": "John Doe",
+  "contact_type": "customer",
+  "email": "john@example.com",
+  "phone": "+971500000001",
+  "mobile": "+971500000002",
+  "street": "Business Bay",
+  "street2": "Tower A",
+  "city": "Dubai",
+  "zip": "00000",
+  "country_code": "AE",
+  "state_name": "Dubai",
+  "vat": "123456789",
+  "website": "https://example.com",
+  "ref": "CRM-001",
+  "company_name": "Example LLC",
+  "is_company": false,
+  "active": true
+}</pre>
+                    <h3>Example</h3>
+                    <pre>curl -X POST <t t-out="base_url"/>/api/crm/v1/contacts \
+  -H "Content-Type: application/json" \
+  -H "X-CRM-API-Key: YOUR_API_KEY" \
+  -d '{"name":"John Doe","contact_type":"customer","email":"john@example.com"}'</pre>
+                    <h3>Success response <span class="o_api_doc_status ok">201</span></h3>
+                    <pre>{
+  "success": true,
+  "data": {
+    "id": 42,
+    "name": "John Doe",
+    "contact_type": "customer",
+    "contact_code": "CUST00001",
+    "customer_id": "CUST00001",
+    "vendor_id": false,
+    "employee_id": false,
+    "email": "john@example.com",
+    "phone": "+971500000001",
+    "active": true
+  }
+}</pre>
+                </div>
+
+                <div class="o_api_doc_section">
+                    <h2>Update Contact</h2>
+                    <div class="o_api_doc_endpoint">
+                        <span class="o_api_doc_method put">PUT</span>
+                        <code>/api/crm/v1/contacts/&lt;partner_id&gt;</code>
+                    </div>
+                    <p>Send only the fields you want to change. Request body is required.</p>
+                    <h3>Request body</h3>
+                    <pre>{
+  "email": "john.updated@example.com",
+  "phone": "+971500000099",
+  "contact_type": "vendor",
+  "city": "Abu Dhabi",
+  "country_code": "AE"
+}</pre>
+                    <h3>Example</h3>
+                    <pre>curl -X PUT <t t-out="base_url"/>/api/crm/v1/contacts/42 \
+  -H "Content-Type: application/json" \
+  -H "X-CRM-API-Key: YOUR_API_KEY" \
+  -d '{"email":"john.updated@example.com"}'</pre>
+                    <h3>Success response <span class="o_api_doc_status ok">200</span></h3>
+                    <pre>{
+  "success": true,
+  "data": {
+    "id": 42,
+    "name": "John Doe",
+    "contact_type": "vendor",
+    "contact_code": "VEND00012",
+    "vendor_id": "VEND00012",
+    "email": "john.updated@example.com"
+  }
+}</pre>
+                </div>
+
+                <div class="o_api_doc_section">
+                    <h2>Request Fields</h2>
+                    <table class="o_api_doc_table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Create</th>
+                                <th>Update</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>name</code></td><td>Required</td><td>Optional</td><td>Contact name</td></tr>
+                            <tr><td><code>contact_type</code></td><td>Required</td><td>Optional</td><td><code>customer</code>, <code>vendor</code>, or <code>employee</code></td></tr>
+                            <tr><td><code>email</code></td><td>Optional</td><td>Optional</td><td>Email address</td></tr>
+                            <tr><td><code>phone</code></td><td>Optional</td><td>Optional</td><td>Phone number</td></tr>
+                            <tr><td><code>mobile</code></td><td>Optional</td><td>Optional</td><td>Mobile number</td></tr>
+                            <tr><td><code>street</code></td><td>Optional</td><td>Optional</td><td>Street address</td></tr>
+                            <tr><td><code>street2</code></td><td>Optional</td><td>Optional</td><td>Street address line 2</td></tr>
+                            <tr><td><code>city</code></td><td>Optional</td><td>Optional</td><td>City</td></tr>
+                            <tr><td><code>zip</code></td><td>Optional</td><td>Optional</td><td>Postal code</td></tr>
+                            <tr><td><code>country_code</code></td><td>Optional</td><td>Optional</td><td>ISO country code, e.g. <code>AE</code></td></tr>
+                            <tr><td><code>state_name</code></td><td>Optional</td><td>Optional</td><td>State name (requires <code>country_code</code>)</td></tr>
+                            <tr><td><code>state_code</code></td><td>Optional</td><td>Optional</td><td>State code (requires <code>country_code</code>)</td></tr>
+                            <tr><td><code>vat</code></td><td>Optional</td><td>Optional</td><td>Tax registration number</td></tr>
+                            <tr><td><code>website</code></td><td>Optional</td><td>Optional</td><td>Website URL</td></tr>
+                            <tr><td><code>ref</code></td><td>Optional</td><td>Optional</td><td>External reference from CRM</td></tr>
+                            <tr><td><code>company_name</code></td><td>Optional</td><td>Optional</td><td>Company name for individuals</td></tr>
+                            <tr><td><code>is_company</code></td><td>Optional</td><td>Optional</td><td>Boolean</td></tr>
+                            <tr><td><code>active</code></td><td>Optional</td><td>Optional</td><td>Boolean</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="o_api_doc_section">
+                    <h2>Error Responses</h2>
+                    <table class="o_api_doc_table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>When</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><span class="o_api_doc_status warn">401</span></td><td>Missing or invalid API key, or integration disabled</td></tr>
+                            <tr><td><span class="o_api_doc_status warn">400</span></td><td>Validation error or invalid JSON</td></tr>
+                            <tr><td><span class="o_api_doc_status warn">403</span></td><td>Contact cannot be updated through API</td></tr>
+                            <tr><td><span class="o_api_doc_status warn">404</span></td><td>Contact not found</td></tr>
+                            <tr><td><span class="o_api_doc_status bad">500</span></td><td>Unexpected server error</td></tr>
+                        </tbody>
+                    </table>
+                    <pre>{
+  "success": false,
+  "error": "Error message here"
+}</pre>
+                </div>
+
+                <div class="o_api_doc_section">
+                    <h2>Notes</h2>
+                    <ul>
+                        <li>Auto IDs (<code>CUST00001</code>, <code>VEND00001</code>, <code>EMP00001</code>) are assigned based on <code>contact_type</code>.</li>
+                        <li>Changing <code>contact_type</code> on update assigns a new ID if one does not exist yet.</li>
+                        <li>All requests and responses use <code>application/json</code>.</li>
+                    </ul>
+                </div>
+            </section>
+        </xpath>
+    </template>
+
+    <record id="action_crm_api_doc" model="ir.actions.act_url">
+        <field name="name">CRM API Documentation</field>
+        <field name="url">/api/docs#crm-integration</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
