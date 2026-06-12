@@ -9,8 +9,7 @@ Collection of custom Odoo 19 Enterprise modules by **Najoom Al Thuraya**.
 | `college_erp` | College student management (admissions, records) |
 | `custom_contacts` | Typed contacts with auto-generated customer, vendor, and employee IDs |
 | `custom_invoice` | Custom invoice PDF layout, fields, and company toggle |
-| `api_documentation` | Shared REST API documentation page for custom integrations |
-| `crm_integration` | Company-level CRM integration toggle and API key settings |
+| `crm_integration` | CRM REST APIs, API key settings, and static API documentation |
 
 ## Requirements
 

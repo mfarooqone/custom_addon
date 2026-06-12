@@ -1,5 +1,6 @@
 from odoo import api, models
 from odoo.exceptions import AccessError, ValidationError
+from odoo.orm.types import DomainType
 
 # Allowed values for contact_type (from custom_contacts module)
 CONTACT_TYPES = frozenset({'customer', 'vendor', 'employee'})
@@ -10,26 +11,21 @@ PARTNER_API_FIELDS = (
     'vat', 'website', 'comment', 'ref', 'company_name',
 )
 
-# Boolean fields from JSON payload
-PARTNER_API_BOOL_FIELDS = ('is_company', 'active')
+CRM_API_RESPONSE_FIELDS = (
+    'name', 'contact_type', 'customer_id', 'vendor_id', 'employee_id',
+    'email', 'phone', 'mobile', 'street', 'street2', 'city', 'zip',
+    'state_id', 'country_id', 'vat', 'is_company', 'company_name',
+    'ref', 'website', 'active',
+)
 
 
 class ResPartner(models.Model):
-    _inherit = 'res.partner'
+    _name = 'res.partner'
+    _inherit: list[str] | None = ['res.partner']
 
     # -------------------------------------------------------------------------
     # Authentication & request parsing
     # -------------------------------------------------------------------------
-
-    @api.model
-    def _crm_get_api_key(self, request):
-        api_key = request.httprequest.headers.get('X-CRM-API-Key', '').strip()
-        if api_key:
-            return api_key
-        authorization = request.httprequest.headers.get('Authorization', '')
-        if authorization.startswith('Bearer '):
-            return authorization[7:].strip()
-        return ''
 
     @api.model
     def _crm_authenticate_company(self, request):
@@ -41,7 +37,11 @@ class ResPartner(models.Model):
 
         Integration must be enabled on the company (Settings -> CRM Integration).
         """
-        api_key = self._crm_get_api_key(request)
+        api_key = request.httprequest.headers.get('X-CRM-API-Key', '').strip()
+        if not api_key:
+            authorization = request.httprequest.headers.get('Authorization', '')
+            if authorization.startswith('Bearer '):
+                api_key = authorization[7:].strip()
         if not api_key:
             raise AccessError('Missing API key. Use X-CRM-API-Key or Authorization: Bearer <key>.')
         company = self.env['res.company'].sudo().search([
@@ -69,37 +69,6 @@ class ResPartner(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _crm_normalize_contact_type(self, contact_type):
-        if contact_type is None:
-            return None
-        contact_type = str(contact_type).lower()
-        if contact_type not in CONTACT_TYPES:
-            raise ValidationError('contact_type must be one of: customer, vendor, employee.')
-        return contact_type
-
-    @api.model
-    def _crm_resolve_country(self, country_code):
-        country = self.env['res.country'].sudo().search([
-            ('code', '=', str(country_code).upper()),
-        ], limit=1)
-        if not country:
-            raise ValidationError(f'Unknown country code: {country_code}')
-        return country.id
-
-    @api.model
-    def _crm_resolve_state(self, country_id, state_name=None, state_code=None):
-        if not country_id:
-            raise ValidationError('country_code is required when sending state_name or state_code.')
-        domain = [('country_id', '=', country_id)]
-        domain.append(
-            ('code', '=', str(state_code).upper()) if state_code else ('name', '=ilike', state_name)
-        )
-        state = self.env['res.country.state'].sudo().search(domain, limit=1)
-        if not state:
-            raise ValidationError('Unknown state for the given country.')
-        return state.id
-
-    @api.model
     def _crm_prepare_partner_vals(self, payload, *, for_create=False):
         """Build res.partner write/create values from API JSON.
 
@@ -107,11 +76,16 @@ class ResPartner(models.Model):
         country_code / state_name / state_code are resolved to Odoo IDs.
         """
         if for_create:
-            for field_name in ('name', 'contact_type'):
-                if not payload.get(field_name):
-                    raise ValidationError(f'{field_name} is required.')
+            if not payload.get('name'):
+                raise ValidationError('name is required.')
+            if not payload.get('contact_type'):
+                raise ValidationError('contact_type is required.')
 
-        contact_type = self._crm_normalize_contact_type(payload.get('contact_type'))
+        contact_type = payload.get('contact_type')
+        if contact_type is not None:
+            contact_type = str(contact_type).lower()
+            if contact_type not in CONTACT_TYPES:
+                raise ValidationError('contact_type must be one of: customer, vendor, employee.')
 
         vals = {
             field_name: payload[field_name]
@@ -120,21 +94,35 @@ class ResPartner(models.Model):
         }
         if contact_type is not None:
             vals['contact_type'] = contact_type
-        for field_name in PARTNER_API_BOOL_FIELDS:
+        for field_name in ('is_company', 'active'):
             if field_name in payload:
                 vals[field_name] = bool(payload[field_name])
 
         # Resolve ISO country code (e.g. "AE") to res.country
-        if payload.get('country_code'):
-            vals['country_id'] = self._crm_resolve_country(payload['country_code'])
+        country_code = payload.get('country_code')
+        if country_code:
+            country = self.env['res.country'].sudo().search([
+                ('code', '=', str(country_code).upper()),
+            ], limit=1)
+            if not country:
+                raise ValidationError(f'Unknown country code: {country_code}')
+            vals['country_id'] = country.id
 
         # State requires country_code in the same request (or already in vals)
-        if payload.get('state_name') or payload.get('state_code'):
-            vals['state_id'] = self._crm_resolve_state(
-                vals.get('country_id'),
-                state_name=payload.get('state_name'),
-                state_code=payload.get('state_code'),
-            )
+        state_name = payload.get('state_name')
+        state_code = payload.get('state_code')
+        if state_name or state_code:
+            if not vals.get('country_id'):
+                raise ValidationError('country_code is required when sending state_name or state_code.')
+            domain: DomainType = [('country_id', '=', vals['country_id'])]
+            domain = [
+                *domain,
+                ('code', '=', str(state_code).upper()) if state_code else ('name', '=ilike', state_name),
+            ]
+            state = self.env['res.country.state'].sudo().search(domain, limit=1)
+            if not state:
+                raise ValidationError('Unknown state for the given country.')
+            vals['state_id'] = state.id
 
         return vals
 
@@ -145,33 +133,38 @@ class ResPartner(models.Model):
     def _crm_api_serialize(self):
         """Format partner record for JSON API response."""
         self.ensure_one()
+        fields_to_read = [name for name in CRM_API_RESPONSE_FIELDS if name in self._fields]
+        row = self.read(fields_to_read)[0]
+        contact_type = row.get('contact_type')
         # contact_code is the active ID for the current type (CUST/VEND/EMP)
-        id_field = self._contact_id_field(self.contact_type) if self.contact_type else False
+        id_field = self._contact_id_field(contact_type) if contact_type else False
+        state = row.get('state_id') or False
+        country = row.get('country_id') or False
         return {
-            'id': self.id,
-            'name': self.name,
-            'contact_type': self.contact_type,
-            'contact_code': self[id_field] if id_field else False,
-            'customer_id': self.customer_id,
-            'vendor_id': self.vendor_id,
-            'employee_id': self.employee_id,
-            'email': self.email,
-            'phone': self.phone,
-            'mobile': self.mobile,
-            'street': self.street,
-            'street2': self.street2,
-            'city': self.city,
-            'zip': self.zip,
-            'state_id': self.state_id.id or False,
-            'state_name': self.state_id.name or False,
-            'country_id': self.country_id.id or False,
-            'country_code': self.country_id.code or False,
-            'vat': self.vat,
-            'is_company': self.is_company,
-            'company_name': self.company_name,
-            'ref': self.ref,
-            'website': self.website,
-            'active': self.active,
+            'id': row['id'],
+            'name': row['name'],
+            'contact_type': contact_type,
+            'contact_code': row.get(id_field) if id_field else False,
+            'customer_id': row.get('customer_id'),
+            'vendor_id': row.get('vendor_id'),
+            'employee_id': row.get('employee_id'),
+            'email': row.get('email'),
+            'phone': row.get('phone'),
+            'mobile': row.get('mobile'),
+            'street': row.get('street'),
+            'street2': row.get('street2'),
+            'city': row.get('city'),
+            'zip': row.get('zip'),
+            'state_id': state[0] if state else False,
+            'state_name': state[1] if state else False,
+            'country_id': country[0] if country else False,
+            'country_code': self.env['res.country'].browse(country[0]).code if country else False,
+            'vat': row.get('vat'),
+            'is_company': row.get('is_company'),
+            'company_name': row.get('company_name'),
+            'ref': row.get('ref'),
+            'website': row.get('website'),
+            'active': row.get('active'),
         }
 
     def _crm_api_check_writable(self):

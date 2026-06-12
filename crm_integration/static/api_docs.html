@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CRM Integration API</title>
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --card: #fff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #714b67;
+            --post: #16a34a;
+            --put: #2563eb;
+            --ok: #15803d;
+            --warn: #b45309;
+            --bad: #b91c1c;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+        header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        header p.eyebrow {
+            margin: 0 0 0.25rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        h1 { margin: 0 0 0.5rem; font-size: 1.75rem; color: var(--accent); }
+        .lead { margin: 0; color: var(--muted); }
+        .base-url {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .base-url code {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        h2 {
+            margin: 0 0 0.75rem;
+            font-size: 1.15rem;
+            color: var(--accent);
+        }
+        h3 {
+            margin: 1.25rem 0 0.5rem;
+            font-size: 0.95rem;
+        }
+        p { margin: 0.5rem 0; }
+        code {
+            background: #f3f4f6;
+            padding: 0.1rem 0.35rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .endpoint {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+            flex-wrap: wrap;
+        }
+        .method {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .method.post { background: var(--post); }
+        .method.put { background: var(--put); }
+        .auth-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+        .auth-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+        }
+        .auth-card h3 { margin-top: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        th { background: var(--bg); }
+        .status {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+        }
+        .status.ok { background: #dcfce7; color: var(--ok); }
+        .status.warn { background: #fef3c7; color: var(--warn); }
+        .status.bad { background: #fee2e2; color: var(--bad); }
+        ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <p class="eyebrow">Najoom Al Thuraya · Odoo 19</p>
+            <h1>CRM Integration API</h1>
+            <p class="lead">REST endpoints to create and update contacts with contact type support.</p>
+            <p class="base-url">Base URL: <code id="base-url"></code></p>
+        </header>
+
+        <section>
+            <h2>Authentication</h2>
+            <p>Every request must include the company CRM API key from <strong>Settings → CRM Integration</strong>.
+               CRM integration must be enabled for the company.</p>
+            <div class="auth-cards">
+                <div class="auth-card">
+                    <h3>Header (recommended)</h3>
+                    <pre>X-CRM-API-Key: &lt;your-api-key&gt;</pre>
+                </div>
+                <div class="auth-card">
+                    <h3>Bearer token</h3>
+                    <pre>Authorization: Bearer &lt;your-api-key&gt;</pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Create Contact</h2>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/crm/v1/contacts</code>
+            </div>
+            <p><strong>Required:</strong> <code>name</code>, <code>contact_type</code></p>
+            <p><code>contact_type</code> values: <code>customer</code>, <code>vendor</code>, <code>employee</code></p>
+            <h3>Request body</h3>
+            <pre>{
+  "name": "John Doe",
+  "contact_type": "customer",
+  "email": "john@example.com",
+  "phone": "+971500000001",
+  "mobile": "+971500000002",
+  "street": "Business Bay",
+  "street2": "Tower A",
+  "city": "Dubai",
+  "zip": "00000",
+  "country_code": "AE",
+  "state_name": "Dubai",
+  "vat": "123456789",
+  "website": "https://example.com",
+  "ref": "CRM-001",
+  "company_name": "Example LLC",
+  "is_company": false,
+  "active": true
+}</pre>
+            <h3>Example</h3>
+            <pre id="curl-create"></pre>
+            <h3>Success response <span class="status ok">201</span></h3>
+            <pre>{
+  "success": true,
+  "data": {
+    "id": 42,
+    "name": "John Doe",
+    "contact_type": "customer",
+    "contact_code": "CUST00001",
+    "customer_id": "CUST00001",
+    "vendor_id": false,
+    "employee_id": false,
+    "email": "john@example.com",
+    "phone": "+971500000001",
+    "active": true
+  }
+}</pre>
+        </section>
+
+        <section>
+            <h2>Update Contact</h2>
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <code>/api/crm/v1/contacts/&lt;partner_id&gt;</code>
+            </div>
+            <p>Send only the fields you want to change. Request body is required.</p>
+            <h3>Request body</h3>
+            <pre>{
+  "email": "john.updated@example.com",
+  "phone": "+971500000099",
+  "contact_type": "vendor",
+  "city": "Abu Dhabi",
+  "country_code": "AE"
+}</pre>
+            <h3>Example</h3>
+            <pre id="curl-update"></pre>
+            <h3>Success response <span class="status ok">200</span></h3>
+            <pre>{
+  "success": true,
+  "data": {
+    "id": 42,
+    "name": "John Doe",
+    "contact_type": "vendor",
+    "contact_code": "VEND00012",
+    "vendor_id": "VEND00012",
+    "email": "john.updated@example.com"
+  }
+}</pre>
+        </section>
+
+        <section>
+            <h2>Request Fields</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Create</th>
+                        <th>Update</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>name</code></td><td>Required</td><td>Optional</td><td>Contact name</td></tr>
+                    <tr><td><code>contact_type</code></td><td>Required</td><td>Optional</td><td><code>customer</code>, <code>vendor</code>, or <code>employee</code></td></tr>
+                    <tr><td><code>email</code></td><td>Optional</td><td>Optional</td><td>Email address</td></tr>
+                    <tr><td><code>phone</code></td><td>Optional</td><td>Optional</td><td>Phone number</td></tr>
+                    <tr><td><code>mobile</code></td><td>Optional</td><td>Optional</td><td>Mobile number</td></tr>
+                    <tr><td><code>street</code></td><td>Optional</td><td>Optional</td><td>Street address</td></tr>
+                    <tr><td><code>street2</code></td><td>Optional</td><td>Optional</td><td>Street address line 2</td></tr>
+                    <tr><td><code>city</code></td><td>Optional</td><td>Optional</td><td>City</td></tr>
+                    <tr><td><code>zip</code></td><td>Optional</td><td>Optional</td><td>Postal code</td></tr>
+                    <tr><td><code>country_code</code></td><td>Optional</td><td>Optional</td><td>ISO country code, e.g. <code>AE</code></td></tr>
+                    <tr><td><code>state_name</code></td><td>Optional</td><td>Optional</td><td>State name (requires <code>country_code</code>)</td></tr>
+                    <tr><td><code>state_code</code></td><td>Optional</td><td>Optional</td><td>State code (requires <code>country_code</code>)</td></tr>
+                    <tr><td><code>vat</code></td><td>Optional</td><td>Optional</td><td>Tax registration number</td></tr>
+                    <tr><td><code>website</code></td><td>Optional</td><td>Optional</td><td>Website URL</td></tr>
+                    <tr><td><code>ref</code></td><td>Optional</td><td>Optional</td><td>External reference from CRM</td></tr>
+                    <tr><td><code>company_name</code></td><td>Optional</td><td>Optional</td><td>Company name for individuals</td></tr>
+                    <tr><td><code>is_company</code></td><td>Optional</td><td>Optional</td><td>Boolean</td></tr>
+                    <tr><td><code>active</code></td><td>Optional</td><td>Optional</td><td>Boolean</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Error Responses</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="status warn">401</span></td><td>Missing or invalid API key, or integration disabled</td></tr>
+                    <tr><td><span class="status warn">400</span></td><td>Validation error or invalid JSON</td></tr>
+                    <tr><td><span class="status warn">403</span></td><td>Contact cannot be updated through API</td></tr>
+                    <tr><td><span class="status warn">404</span></td><td>Contact not found</td></tr>
+                    <tr><td><span class="status bad">500</span></td><td>Unexpected server error</td></tr>
+                </tbody>
+            </table>
+            <pre>{
+  "success": false,
+  "error": "Error message here"
+}</pre>
+        </section>
+
+        <section>
+            <h2>Notes</h2>
+            <ul>
+                <li>Auto IDs (<code>CUST00001</code>, <code>VEND00001</code>, <code>EMP00001</code>) are assigned based on <code>contact_type</code>.</li>
+                <li>Changing <code>contact_type</code> on update assigns a new ID if one does not exist yet.</li>
+                <li>All requests and responses use <code>application/json</code>.</li>
+            </ul>
+        </section>
+    </div>
+    <script>
+        (function () {
+            var base = window.location.origin;
+            document.getElementById('base-url').textContent = base;
+            document.getElementById('curl-create').textContent =
+                'curl -X POST ' + base + '/api/crm/v1/contacts \\\n' +
+                '  -H "Content-Type: application/json" \\\n' +
+                '  -H "X-CRM-API-Key: YOUR_API_KEY" \\\n' +
+                '  -d \'{"name":"John Doe","contact_type":"customer","email":"john@example.com"}\'';
+            document.getElementById('curl-update').textContent =
+                'curl -X PUT ' + base + '/api/crm/v1/contacts/42 \\\n' +
+                '  -H "Content-Type: application/json" \\\n' +
+                '  -H "X-CRM-API-Key: YOUR_API_KEY" \\\n' +
+                '  -d \'{"email":"john.updated@example.com"}\'';
+        })();
+    </script>
+</body>
+</html>

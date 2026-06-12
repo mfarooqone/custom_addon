@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_crm_api_doc" model="ir.actions.act_url">
+        <field name="name">CRM API Documentation</field>
+        <field name="url">/crm_integration/static/api_docs.html</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
