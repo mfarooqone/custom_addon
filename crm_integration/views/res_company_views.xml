@@ -9,8 +9,15 @@
                 <page string="CRM Integration" name="crm_integration">
                     <group>
                         <field name="is_crm_integration_enabled"/>
-                        <field name="crm_api_key" password="True"/>
+                        <field name="crm_api_key" widget="password"/>
                     </group>
+                    <div class="mt-2">
+                        <button type="action"
+                                name="%(crm_integration.action_crm_api_doc)d"
+                                string="Open API Documentation"
+                                class="btn-link"
+                                icon="oi-arrow-right"/>
+                    </div>
                 </page>
             </xpath>
         </field>

@@ -1,0 +1,211 @@
+body.o_crm_api_doc {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f4f6f9;
+    color: #212529;
+    line-height: 1.55;
+}
+
+.o_crm_api_doc_container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+}
+
+.o_crm_api_doc_header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #017e84 0%, #015e63 100%);
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(1, 94, 99, 0.18);
+}
+
+.o_crm_api_doc_header h1 {
+    margin: 6px 0 10px;
+    font-size: 2rem;
+}
+
+.o_crm_api_doc_eyebrow {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.o_crm_api_doc_lead {
+    margin: 0;
+    max-width: 560px;
+    opacity: 0.95;
+}
+
+.o_crm_api_doc_base_url {
+    min-width: 240px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+}
+
+.o_crm_api_doc_base_url span {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.85;
+    margin-bottom: 6px;
+}
+
+.o_crm_api_doc_base_url code {
+    word-break: break-all;
+    font-size: 0.95rem;
+}
+
+.o_crm_api_doc_section {
+    margin-bottom: 28px;
+    padding: 24px 28px;
+    background: #fff;
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
+}
+
+.o_crm_api_doc_section h2 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 1.35rem;
+    color: #017e84;
+}
+
+.o_crm_api_doc_section h3 {
+    margin: 20px 0 10px;
+    font-size: 1rem;
+}
+
+.o_crm_api_doc_endpoint {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    background: #f8fafb;
+    border: 1px solid #e7ebf0;
+    border-radius: 8px;
+}
+
+.o_crm_api_doc_method {
+    display: inline-block;
+    min-width: 54px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+.o_crm_api_doc_method.post {
+    background: #d1f2eb;
+    color: #0f5132;
+}
+
+.o_crm_api_doc_method.put {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.o_crm_api_doc_cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.o_crm_api_doc_card {
+    padding: 16px;
+    background: #f8fafb;
+    border: 1px solid #e7ebf0;
+    border-radius: 8px;
+}
+
+.o_crm_api_doc_card h3 {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+}
+
+pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    background: #1e2530;
+    color: #e8edf5;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+code {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.o_crm_api_doc_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px;
+    font-size: 0.92rem;
+}
+
+.o_crm_api_doc_table th,
+.o_crm_api_doc_table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e7ebf0;
+    text-align: left;
+    vertical-align: top;
+}
+
+.o_crm_api_doc_table th {
+    background: #f8fafb;
+    font-weight: 600;
+}
+
+.o_crm_api_doc_status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.o_crm_api_doc_status.ok {
+    background: #d1f2eb;
+    color: #0f5132;
+}
+
+.o_crm_api_doc_status.warn {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.o_crm_api_doc_status.bad {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.o_crm_api_doc_section ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.o_crm_api_doc_section li + li {
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .o_crm_api_doc_header {
+        flex-direction: column;
+    }
+
+    .o_crm_api_doc_container {
+        padding: 20px 16px 32px;
+    }
+}

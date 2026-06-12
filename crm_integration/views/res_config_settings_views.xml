@@ -20,7 +20,16 @@
                         <setting id="crm_api_key_setting"
                                  string="CRM API Key"
                                  help="API key used to authenticate CRM requests.">
-                            <field name="crm_api_key" password="True"/>
+                            <field name="crm_api_key" widget="password"/>
+                        </setting>
+                        <setting id="crm_api_doc_setting"
+                                 string="API Documentation"
+                                 help="Open the REST API reference for create and update contact endpoints.">
+                            <button type="action"
+                                    name="%(crm_integration.action_crm_api_doc)d"
+                                    string="Open API Documentation"
+                                    class="btn-link"
+                                    icon="oi-arrow-right"/>
                         </setting>
                     </block>
                 </app>

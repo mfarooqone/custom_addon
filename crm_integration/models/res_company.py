@@ -4,6 +4,7 @@ from odoo import fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    # Per-company toggle and shared secret for external CRM API calls
     is_crm_integration_enabled = fields.Boolean(
         string='Enable CRM Integration',
         default=False,
